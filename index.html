@@ -31,10 +31,44 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.light-mode {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #FFFFFF;
+            background-color: transparent;
+            color: #FFFFFF;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+        }
+
+        body.light-mode .theme-toggle {
+            border-color: #000000;
+            color: #000000;
         }
 
         .poet-text {
-            font-size: 18px;
+            font-size: 16px;
             letter-spacing: 1px;
             opacity: 0;
             margin-bottom: 20px;
@@ -94,10 +128,22 @@
             font-size: 16px;
             font-family: 'Courier New', Courier, monospace;
             width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .edit-input {
+            background-color: #000000;
+            color: #FFFFFF;
+            border: 1px solid #000000;
         }
 
         .edit-input:focus {
             outline: 2px solid #FFFFFF;
+            outline-offset: 2px;
+        }
+
+        body.light-mode .edit-input:focus {
+            outline: 2px solid #000000;
             outline-offset: 2px;
         }
 
@@ -117,6 +163,7 @@
             margin-bottom: 60px;
             font-family: 'Georgia', 'Garamond', serif;
             line-height: 1;
+            font-variant-numeric: tabular-nums;
         }
 
         .button-container {
@@ -135,9 +182,20 @@
             transition: all 0.2s;
         }
 
+        body.light-mode button {
+            background-color: #FFFFFF;
+            color: #000000;
+            border: 1px solid #000000;
+        }
+
         button:hover {
             background-color: #FFFFFF;
             color: #000000;
+        }
+
+        body.light-mode button:hover {
+            background-color: #000000;
+            color: #FFFFFF;
         }
 
         button:active {
@@ -154,6 +212,11 @@
             color: #FFFFFF;
         }
 
+        body.light-mode button:disabled:hover {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
         @media (max-width: 768px) {
             .timer-display {
                 font-size: 140px;
@@ -164,7 +227,7 @@
             }
 
             .poet-text {
-                font-size: 16px;
+                font-size: 14px;
             }
 
             .edit-input {
@@ -172,9 +235,21 @@
                 width: 300px;
             }
 
+            .edit-label {
+                font-size: 14px;
+            }
+
             .edit-box {
                 left: 20px;
                 bottom: 20px;
+            }
+
+            .theme-toggle {
+                top: 20px;
+                right: 20px;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
             }
 
             button {
@@ -193,7 +268,7 @@
             }
 
             .poet-text {
-                font-size: 14px;
+                font-size: 12px;
             }
 
             .edit-input {
@@ -202,13 +277,23 @@
             }
 
             .edit-label {
-                font-size: 14px;
+                font-size: 12px;
                 width: 60px;
+            }
+
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">⏾</button>
+
     <div class="timer-container">
         <div class="timer-display" id="timer">30:00</div>
         <div class="button-container">
@@ -219,7 +304,7 @@
 
     <div class="edit-box">
         <div class="poet-text" id="poetText">
-            <span>Poet generating</span><span class="loading-dots" id="loadingDots"></span>
+            <span>POET GENERATING</span><span class="loading-dots" id="loadingDots"></span>
         </div>
         <div class="edit-row">
             <div class="edit-label">THEME:</div>
@@ -243,10 +328,20 @@
         const loadingDots = document.getElementById('loadingDots');
         const themeInput = document.getElementById('themeInput');
         const modelInput = document.getElementById('modelInput');
+        const themeToggle = document.getElementById('themeToggle');
 
         // Load theme and model values
         themeInput.value = THEME;
         modelInput.value = EXPERIMENT_NAME;
+
+        // Theme toggle functionality
+        let isLightMode = false;
+
+        themeToggle.addEventListener('click', () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle('light-mode');
+            themeToggle.textContent = isLightMode ? '☀︎' : '⏾';
+        });
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -363,6 +458,11 @@
             } else {
                 startTimer();
             }
+        });
+
+        // Reset button event listener
+        resetBtn.addEventListener('click', () => {
+            resetTimer();
         });
 
         // Request notification permission on load
