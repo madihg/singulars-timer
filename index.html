@@ -171,8 +171,9 @@
             font-weight: 400;
             font-family: 'Georgia', 'Garamond', serif;
             font-variant-numeric: tabular-nums;
-            min-width: 1.3ch;
+            width: 2.2ch;
             text-align: center;
+            display: inline-block;
         }
 
         .timer-colon {
@@ -237,6 +238,7 @@
             .timer-minutes,
             .timer-seconds {
                 font-size: 210px;
+                width: 2.2ch;
             }
 
             .timer-colon {
@@ -284,6 +286,7 @@
             .timer-minutes,
             .timer-seconds {
                 font-size: 135px;
+                width: 2.2ch;
             }
 
             .timer-colon {
@@ -362,10 +365,6 @@
         const themeInput = document.getElementById('themeInput');
         const modelInput = document.getElementById('modelInput');
         const themeToggle = document.getElementById('themeToggle');
-
-        // Load theme and model values
-        themeInput.value = THEME;
-        modelInput.value = EXPERIMENT_NAME;
 
         // Theme toggle functionality
         let isLightMode = false;
