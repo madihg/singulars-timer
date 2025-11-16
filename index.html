@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Minute Timer</title>
+    
+    <!-- ============================================ -->
+    <!-- EASY EDIT SECTION - CHANGE THESE VALUES -->
+    <!-- ============================================ -->
+    <script>
+        const EXPERIMENT_NAME = "reinforcement.exe";
+        const THEME = "Write about transformation through adversity";
+    </script>
+    <!-- ============================================ -->
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .poet-text {
+            font-size: 18px;
+            letter-spacing: 1px;
+            opacity: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .poet-text.active {
+            opacity: 0.7;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            width: 40px;
+        }
+
+        .loading-dots.animating::after {
+            content: '';
+            animation: loadingDots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes loadingDots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .edit-box {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            text-align: left;
+        }
+
+        .edit-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .edit-label {
+            font-size: 16px;
+            letter-spacing: 1px;
+            width: 80px;
+            opacity: 0.7;
+        }
+
+        .edit-input {
+            background-color: #FFFFFF;
+            color: #000000;
+            border: 1px solid #FFFFFF;
+            padding: 8px 12px;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            width: 400px;
+        }
+
+        .edit-input:focus {
+            outline: 2px solid #FFFFFF;
+            outline-offset: 2px;
+        }
+
+        .timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            margin-top: -100px;
+        }
+
+        .timer-display {
+            font-size: 280px;
+            font-weight: 400;
+            letter-spacing: 8px;
+            margin-bottom: 60px;
+            font-family: 'Georgia', 'Garamond', serif;
+            line-height: 1;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            background-color: #000000;
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+            padding: 12px 40px;
+            font-size: 18px;
+            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:disabled:hover {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 140px;
+            }
+            
+            .timer-container {
+                margin-top: -50px;
+            }
+
+            .poet-text {
+                font-size: 16px;
+            }
+
+            .edit-input {
+                font-size: 14px;
+                width: 300px;
+            }
+
+            .edit-box {
+                left: 20px;
+                bottom: 20px;
+            }
+
+            button {
+                padding: 10px 30px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timer-display {
+                font-size: 90px;
+            }
+            
+            .timer-container {
+                margin-top: -30px;
+            }
+
+            .poet-text {
+                font-size: 14px;
+            }
+
+            .edit-input {
+                font-size: 12px;
+                width: 200px;
+            }
+
+            .edit-label {
+                font-size: 14px;
+                width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container">
+        <div class="timer-display" id="timer">30:00</div>
+        <div class="button-container">
+            <button id="startBtn">START</button>
+            <button id="resetBtn" style="display: none;">RESET</button>
+        </div>
+    </div>
+
+    <div class="edit-box">
+        <div class="poet-text" id="poetText">
+            <span>Poet generating</span><span class="loading-dots" id="loadingDots"></span>
+        </div>
+        <div class="edit-row">
+            <div class="edit-label">THEME:</div>
+            <input type="text" class="edit-input" id="themeInput" placeholder="Enter theme...">
+        </div>
+        <div class="edit-row">
+            <div class="edit-label">MODEL:</div>
+            <input type="text" class="edit-input" id="modelInput" placeholder="Enter model...">
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 1800; // 30 minutes in seconds
+        let timerInterval = null;
+        let isRunning = false;
+
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const poetText = document.getElementById('poetText');
+        const loadingDots = document.getElementById('loadingDots');
+        const themeInput = document.getElementById('themeInput');
+        const modelInput = document.getElementById('modelInput');
+
+        // Load theme and model values
+        themeInput.value = THEME;
+        modelInput.value = EXPERIMENT_NAME;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startBtn.textContent = 'PAUSE';
+            resetBtn.style.display = 'inline-block';
+            
+            // Show "Poet generating" with loading dots
+            poetText.classList.add('active');
+            loadingDots.classList.add('animating');
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    // Timer completed
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startBtn.textContent = 'START';
+                    timerDisplay.textContent = "TIME'S UP!";
+                    
+                    // Hide "Poet generating"
+                    poetText.classList.remove('active');
+                    loadingDots.classList.remove('animating');
+                    
+                    // Optional: Play a sound or notification
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('Timer Complete!', {
+                            body: '30 minutes have elapsed.'
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!isRunning) return;
+            
+            clearInterval(timerInterval);
+            isRunning = false;
+            startBtn.textContent = 'RESUME';
+            
+            // Hide "Poet generating" when paused
+            poetText.classList.remove('active');
+            loadingDots.classList.remove('animating');
+        }
+
+        function resumeTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startBtn.textContent = 'PAUSE';
+            
+            // Show "Poet generating" with loading dots again
+            poetText.classList.add('active');
+            loadingDots.classList.add('animating');
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    // Timer completed
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startBtn.textContent = 'START';
+                    timerDisplay.textContent = "TIME'S UP!";
+                    
+                    // Hide "Poet generating"
+                    poetText.classList.remove('active');
+                    loadingDots.classList.remove('animating');
+                    
+                    // Optional: Play a sound or notification
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('Timer Complete!', {
+                            body: '30 minutes have elapsed.'
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = 1800;
+            updateDisplay();
+            startBtn.textContent = 'START';
+            resetBtn.style.display = 'none';
+            
+            // Hide "Poet generating" when reset
+            poetText.classList.remove('active');
+            loadingDots.classList.remove('animating');
+        }
+
+        // Toggle start/pause/resume
+        startBtn.addEventListener('click', () => {
+            if (isRunning) {
+                pauseTimer();
+            } else if (startBtn.textContent === 'RESUME') {
+                resumeTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
+
