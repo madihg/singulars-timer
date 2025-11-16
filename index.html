@@ -157,13 +157,29 @@
         }
 
         .timer-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 60px;
+            line-height: 1;
+        }
+
+        .timer-minutes,
+        .timer-seconds {
             font-size: 420px;
             font-weight: 400;
-            letter-spacing: 8px;
-            margin-bottom: 60px;
             font-family: 'Georgia', 'Garamond', serif;
-            line-height: 1;
             font-variant-numeric: tabular-nums;
+            min-width: 1.3ch;
+            text-align: center;
+        }
+
+        .timer-colon {
+            font-size: 420px;
+            font-weight: 400;
+            font-family: 'Georgia', 'Garamond', serif;
+            margin: 0 20px;
         }
 
         .button-container {
@@ -218,8 +234,14 @@
         }
 
         @media (max-width: 768px) {
-            .timer-display {
+            .timer-minutes,
+            .timer-seconds {
                 font-size: 210px;
+            }
+
+            .timer-colon {
+                font-size: 210px;
+                margin: 0 10px;
             }
             
             .timer-container {
@@ -259,8 +281,14 @@
         }
 
         @media (max-width: 480px) {
-            .timer-display {
+            .timer-minutes,
+            .timer-seconds {
                 font-size: 135px;
+            }
+
+            .timer-colon {
+                font-size: 135px;
+                margin: 0 8px;
             }
             
             .timer-container {
@@ -295,7 +323,11 @@
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">⏾</button>
 
     <div class="timer-container">
-        <div class="timer-display" id="timer">30:00</div>
+        <div class="timer-display">
+            <span class="timer-minutes" id="timerMinutes">30</span>
+            <span class="timer-colon">:</span>
+            <span class="timer-seconds" id="timerSeconds">00</span>
+        </div>
         <div class="button-container">
             <button id="startBtn">START</button>
             <button id="resetBtn" style="display: none;">RESET</button>
@@ -321,7 +353,8 @@
         let timerInterval = null;
         let isRunning = false;
 
-        const timerDisplay = document.getElementById('timer');
+        const timerMinutes = document.getElementById('timerMinutes');
+        const timerSeconds = document.getElementById('timerSeconds');
         const startBtn = document.getElementById('startBtn');
         const resetBtn = document.getElementById('resetBtn');
         const poetText = document.getElementById('poetText');
@@ -343,14 +376,11 @@
             themeToggle.textContent = isLightMode ? '☀︎' : '⏾';
         });
 
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
         function updateDisplay() {
-            timerDisplay.textContent = formatTime(timeLeft);
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerMinutes.textContent = mins.toString().padStart(2, '0');
+            timerSeconds.textContent = secs.toString().padStart(2, '0');
         }
 
         function startTimer() {
@@ -373,7 +403,8 @@
                     clearInterval(timerInterval);
                     isRunning = false;
                     startBtn.textContent = 'START';
-                    timerDisplay.textContent = "TIME'S UP!";
+                    timerMinutes.textContent = "TIME'S";
+                    timerSeconds.textContent = "UP!";
                     
                     // Hide "Poet generating"
                     poetText.classList.remove('active');
@@ -420,7 +451,8 @@
                     clearInterval(timerInterval);
                     isRunning = false;
                     startBtn.textContent = 'START';
-                    timerDisplay.textContent = "TIME'S UP!";
+                    timerMinutes.textContent = "TIME'S";
+                    timerSeconds.textContent = "UP!";
                     
                     // Hide "Poet generating"
                     poetText.classList.remove('active');
