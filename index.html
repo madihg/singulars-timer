@@ -68,8 +68,45 @@
             color: #000000;
         }
 
-        .poet-text {
+        .break-toggle {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #FFFFFF;
+            background-color: transparent;
+            color: #FFFFFF;
             font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .break-toggle:hover {
+            opacity: 1;
+        }
+
+        body.light-mode .break-toggle {
+            border-color: #000000;
+            color: #000000;
+        }
+
+        .timer-display.times-up .timer-minutes,
+        .timer-display.times-up .timer-seconds {
+            font-size: 180px;
+        }
+
+        .timer-display.times-up .timer-colon {
+            display: none;
+        }
+
+        .poet-text {
+            font-size: 32px;
             letter-spacing: 1px;
             opacity: 0;
             margin-bottom: 20px;
@@ -252,7 +289,7 @@
             }
 
             .poet-text {
-                font-size: 14px;
+                font-size: 28px;
             }
 
             .edit-input {
@@ -281,6 +318,19 @@
                 padding: 10px 30px;
                 font-size: 16px;
             }
+
+            .break-toggle {
+                top: 20px;
+                left: 20px;
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .timer-display.times-up .timer-minutes,
+            .timer-display.times-up .timer-seconds {
+                font-size: 90px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -300,7 +350,7 @@
             }
 
             .poet-text {
-                font-size: 12px;
+                font-size: 24px;
             }
 
             .edit-input {
@@ -320,11 +370,25 @@
                 height: 32px;
                 font-size: 16px;
             }
+
+            .break-toggle {
+                top: 15px;
+                left: 15px;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .timer-display.times-up .timer-minutes,
+            .timer-display.times-up .timer-seconds {
+                font-size: 60px;
+            }
         }
     </style>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">⏾</button>
+    <button class="break-toggle" id="breakToggle" aria-label="Toggle break mode">°•.°•</button>
 
     <div class="timer-container">
         <div class="timer-display">
@@ -356,6 +420,7 @@
         let timeLeft = 1800; // 30 minutes in seconds
         let timerInterval = null;
         let isRunning = false;
+        let isBreakMode = false;
 
         const timerMinutes = document.getElementById('timerMinutes');
         const timerSeconds = document.getElementById('timerSeconds');
@@ -366,6 +431,8 @@
         const themeInput = document.getElementById('themeInput');
         const modelInput = document.getElementById('modelInput');
         const themeToggle = document.getElementById('themeToggle');
+        const breakToggle = document.getElementById('breakToggle');
+        const timerDisplay = document.querySelector('.timer-display');
 
         // Theme toggle functionality
         let isLightMode = false;
@@ -376,11 +443,27 @@
             themeToggle.textContent = isLightMode ? '☀︎' : '⏾';
         });
 
+        breakToggle.addEventListener('click', () => {
+            isBreakMode = !isBreakMode;
+            if (isBreakMode && timeLeft === 0) {
+                // If we're already at zero time, show break message
+                timerDisplay.classList.add('times-up');
+                timerMinutes.textContent = "POETS";
+                timerSeconds.textContent = "TAKE / BREAKS";
+            } else if (!isBreakMode && timeLeft === 0) {
+                // Switch back to time's up message
+                timerDisplay.classList.add('times-up');
+                timerMinutes.textContent = "TIME'S";
+                timerSeconds.textContent = "UP!";
+            }
+        });
+
         function updateDisplay() {
             const mins = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
             timerMinutes.textContent = mins.toString().padStart(2, '0');
             timerSeconds.textContent = secs.toString().padStart(2, '0');
+            timerDisplay.classList.remove('times-up');
         }
 
         function startTimer() {
@@ -403,8 +486,15 @@
                     clearInterval(timerInterval);
                     isRunning = false;
                     startBtn.textContent = 'START';
-                    timerMinutes.textContent = "TIME'S";
-                    timerSeconds.textContent = "UP!";
+                    timerDisplay.classList.add('times-up');
+                    
+                    if (isBreakMode) {
+                        timerMinutes.textContent = "POETS";
+                        timerSeconds.textContent = "TAKE / BREAKS";
+                    } else {
+                        timerMinutes.textContent = "TIME'S";
+                        timerSeconds.textContent = "UP!";
+                    }
                     
                     // Hide "Poet generating"
                     poetText.classList.remove('active');
@@ -451,8 +541,15 @@
                     clearInterval(timerInterval);
                     isRunning = false;
                     startBtn.textContent = 'START';
-                    timerMinutes.textContent = "TIME'S";
-                    timerSeconds.textContent = "UP!";
+                    timerDisplay.classList.add('times-up');
+                    
+                    if (isBreakMode) {
+                        timerMinutes.textContent = "POETS";
+                        timerSeconds.textContent = "TAKE / BREAKS";
+                    } else {
+                        timerMinutes.textContent = "TIME'S";
+                        timerSeconds.textContent = "UP!";
+                    }
                     
                     // Hide "Poet generating"
                     poetText.classList.remove('active');
@@ -472,6 +569,7 @@
             clearInterval(timerInterval);
             isRunning = false;
             timeLeft = 1800;
+            timerDisplay.classList.remove('times-up');
             updateDisplay();
             startBtn.textContent = 'START';
             resetBtn.style.display = 'none';
