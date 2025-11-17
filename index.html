@@ -388,7 +388,7 @@
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">⏾</button>
-    <button class="break-toggle" id="breakToggle" aria-label="Toggle break mode">°•.°•</button>
+    <button class="break-toggle" id="breakToggle" aria-label="Toggle break mode">✷</button>
 
     <div class="timer-container">
         <div class="timer-display">
@@ -445,16 +445,22 @@
 
         breakToggle.addEventListener('click', () => {
             isBreakMode = !isBreakMode;
-            if (isBreakMode && timeLeft === 0) {
-                // If we're already at zero time, show break message
+            if (isBreakMode) {
+                // Show break message
                 timerDisplay.classList.add('times-up');
                 timerMinutes.textContent = "POETS";
                 timerSeconds.textContent = "TAKE / BREAKS";
-            } else if (!isBreakMode && timeLeft === 0) {
-                // Switch back to time's up message
-                timerDisplay.classList.add('times-up');
-                timerMinutes.textContent = "TIME'S";
-                timerSeconds.textContent = "UP!";
+            } else {
+                // Go back to timer display
+                if (timeLeft === 0) {
+                    // If timer finished, show time's up
+                    timerDisplay.classList.add('times-up');
+                    timerMinutes.textContent = "TIME'S";
+                    timerSeconds.textContent = "UP!";
+                } else {
+                    // Otherwise show normal timer
+                    updateDisplay();
+                }
             }
         });
 
