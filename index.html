@@ -96,9 +96,16 @@
             color: #000000;
         }
 
+        .timer-display.times-up {
+            flex-direction: column;
+            gap: 0;
+            line-height: 0.9;
+        }
+
         .timer-display.times-up .timer-minutes,
         .timer-display.times-up .timer-seconds {
             font-size: 180px;
+            width: auto;
         }
 
         .timer-display.times-up .timer-colon {
@@ -330,6 +337,7 @@
             .timer-display.times-up .timer-minutes,
             .timer-display.times-up .timer-seconds {
                 font-size: 90px;
+                width: auto;
             }
         }
 
@@ -382,6 +390,7 @@
             .timer-display.times-up .timer-minutes,
             .timer-display.times-up .timer-seconds {
                 font-size: 60px;
+                width: auto;
             }
         }
     </style>
@@ -448,8 +457,8 @@
             if (isBreakMode) {
                 // Show break message
                 timerDisplay.classList.add('times-up');
-                timerMinutes.textContent = "POETS";
-                timerSeconds.textContent = "TAKE / BREAKS";
+                timerMinutes.textContent = "POETS TAKE /";
+                timerSeconds.textContent = "BREAKS";
             } else {
                 // Go back to timer display
                 if (timeLeft === 0) {
@@ -495,8 +504,8 @@
                     timerDisplay.classList.add('times-up');
                     
                     if (isBreakMode) {
-                        timerMinutes.textContent = "POETS";
-                        timerSeconds.textContent = "TAKE / BREAKS";
+                        timerMinutes.textContent = "POETS TAKE /";
+                        timerSeconds.textContent = "BREAKS";
                     } else {
                         timerMinutes.textContent = "TIME'S";
                         timerSeconds.textContent = "UP!";
@@ -550,8 +559,8 @@
                     timerDisplay.classList.add('times-up');
                     
                     if (isBreakMode) {
-                        timerMinutes.textContent = "POETS";
-                        timerSeconds.textContent = "TAKE / BREAKS";
+                        timerMinutes.textContent = "POETS TAKE /";
+                        timerSeconds.textContent = "BREAKS";
                     } else {
                         timerMinutes.textContent = "TIME'S";
                         timerSeconds.textContent = "UP!";
